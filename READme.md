@@ -1,4 +1,3 @@
-````markdown
 # 🐾 ML Animal World – Django ML App
 
 Aplicación web en **Django** que muestra dos modelos de aprendizaje automático:
