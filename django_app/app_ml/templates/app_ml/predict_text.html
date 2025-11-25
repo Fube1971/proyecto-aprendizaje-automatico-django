@@ -1,0 +1,132 @@
+{% extends "app_ml/base.html" %}
+
+{% block title %}Steam Review Quest · ML Animal World{% endblock %}
+
+{% block main %}
+<section class="hero">
+  <div class="hero-title">
+    Steam Review Quest 🎮
+    <span class="badge">Sentiment analysis · English only</span>
+  </div>
+  <p class="hero-subtitle">
+    Pretend you are a Steam player writing a review for your favorite (or worst) game.
+    Write your review in <strong>English</strong> and the model will guess if you recommend it or not.
+  </p>
+</section>
+
+<div class="grid page-body">
+  <section class="card">
+    <div class="card-header">
+      <div class="card-title">Your mission</div>
+      <span class="pill">Quest · Write a review</span>
+    </div>
+
+    {% if error %}
+      <p style="color:#ff6b81;font-size:0.85rem;margin-bottom:10px;">
+        {{ error }}
+      </p>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <label class="field-label">Write your review (in English)</label>
+
+        <!-- name="review" coincide con request.POST.get("review") -->
+        <textarea
+          name="review"
+          rows="7"
+          style="
+            width:100%;
+            resize:vertical;
+            border-radius:14px;
+            border:1px solid rgba(255,255,255,0.18);
+            background:#080a14;
+            color:var(--text);
+            padding:10px 12px;
+            font-family:inherit;
+            font-size:0.9rem;
+          "
+          placeholder="Example: After 50 hours, this game has amazing combat but the final boss is totally broken..."
+        >{{ text }}</textarea>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="submit" class="btn">
+            Analyze my review
+            <span>🧠</span>
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="fillSampleReview();"
+          >
+            Use a random sample review
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <aside class="card">
+    <div class="card-header">
+      <div class="card-title">Model decision</div>
+      <span class="pill">Step 2 · Prediction</span>
+    </div>
+
+    {% if prediction %}
+      <p style="font-size:0.9rem;margin-bottom:8px;">
+        The model thinks this review is:
+      </p>
+
+      {# Consideramos recomendado si la etiqueta de texto contiene "positivo" #}
+      {% if "positivo" in prediction.label_str|lower %}
+        <div style="font-size:1.4rem;margin-bottom:4px;">
+          👍 Recommended
+        </div>
+        <p style="font-size:0.85rem;color:var(--ok);">
+          Confidence: <strong>{{ prediction.prob|floatformat:2 }}%</strong>
+        </p>
+      {% else %}
+        <div style="font-size:1.4rem;margin-bottom:4px;">
+          👎 Not recommended
+        </div>
+        <p style="font-size:0.85rem;color:var(--danger);">
+          Confidence: <strong>{{ prediction.prob|floatformat:2 }}%</strong>
+        </p>
+      {% endif %}
+
+      <p style="font-size:0.85rem;margin-top:10px;color:var(--muted);">
+        Raw label: <code>{{ prediction.label_str }}</code>
+        (id: {{ prediction.label_id }})
+      </p>
+    {% else %}
+      <p style="font-size:0.9rem;color:var(--muted);">
+        The model is waiting for your story. Write a review and discover if the AI would buy that game
+        or ask for a refund 💸.
+      </p>
+    {% endif %}
+  </aside>
+</div>
+
+<script>
+  function fillSampleReview() {
+    const samples = [
+      // Very positive
+      "After 80 hours, this game became one of my favorites. The combat is super fun, the characters are lovable and the soundtrack is beautiful. Totally recommended.",
+      // Positive
+      "I really enjoyed this game. The story is short but emotional and the art style is gorgeous. I would recommend it on sale.",
+      // Very negative
+      "After a few hours I was completely disappointed. The game is full of bugs, the controls feel terrible and the story makes no sense. I do not recommend it at all.",
+      // Negative
+      "The idea is interesting but the execution is very poor. Repetitive missions, annoying enemies and constant crashes. Not worth the price.",
+      // Mixed
+      "The gameplay is fun and the art is nice, but the game is extremely grindy and the ending is unsatisfying. I only recommend it for hardcore fans of the genre."
+    ];
+
+    const textarea = document.querySelector('textarea[name=review]');
+    if (!textarea) return;
+    const randomIndex = Math.floor(Math.random() * samples.length);
+    textarea.value = samples[randomIndex];
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+Django>=5.0,<6.0
+
+# ML y ciencia de datos
+tensorflow>=2.10.0
+numpy
+pandas
+matplotlib
+scikit-learn
+
+# Imágenes y datasets
+Pillow
+kaggle
+
+# Despliegue web (para Render u otros)
+gunicorn
+whitenoise

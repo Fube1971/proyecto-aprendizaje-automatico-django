@@ -1,0 +1,58 @@
+{% extends "app_ml/base.html" %}
+
+{% block title %}Home · ML Animal World{% endblock %}
+
+{% block main %}
+<section class="hero">
+  <div class="hero-title">
+    Welcome to ML Animal World 🐾
+    <span class="badge">Final project · Aprendizaje Automatico</span>
+  </div>
+  <p class="hero-subtitle">
+    This web app lets you play with two machine learning models:
+    one that classifies animal images and another that analyzes
+    Steam-style game reviews in English.
+  </p>
+</section>
+
+<div class="page-body">
+  <section class="card">
+    <div class="card-header">
+      <div class="card-title">What can you do here?</div>
+      <span class="pill">Overview</span>
+    </div>
+    <div style="display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+      <div class="card" style="background:rgba(0,0,0,0.25);box-shadow:none;">
+        <div class="card-title">🐶 Animal Classifier</div>
+        <p style="font-size:0.85rem;color:var(--muted);">
+          Upload an animal image and the model will try to guess which animal it is.
+        </p>
+        <a href="{% url 'app_ml:predict_image' %}" class="btn" style="text-decoration:none;margin-top:4px;">
+          Try animal prediction
+        </a>
+      </div>
+
+      <div class="card" style="background:rgba(0,0,0,0.25);box-shadow:none;">
+        <div class="card-title">🎮 Steam Review Sentiment</div>
+        <p style="font-size:0.85rem;color:var(--muted);">
+          Roleplay as a Steam player and write a review in English.
+          The model predicts if you recommend the game or not.
+        </p>
+        <a href="{% url 'app_ml:predict_text' %}" class="btn" style="text-decoration:none;margin-top:4px;">
+          Write a review
+        </a>
+      </div>
+
+      <div class="card" style="background:rgba(0,0,0,0.25);box-shadow:none;">
+        <div class="card-title">🧠 Get to know the models</div>
+        <p style="font-size:0.85rem;color:var(--muted);">
+          Learn how the models were trained: datasets, preprocessing, architectures and why each choice was made.
+        </p>
+        <a href="{% url 'app_ml:about_models' %}" class="btn btn-secondary" style="text-decoration:none;margin-top:4px;">
+          Read the model story
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

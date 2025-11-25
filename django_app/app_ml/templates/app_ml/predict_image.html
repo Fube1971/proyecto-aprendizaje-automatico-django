@@ -1,0 +1,110 @@
+{% extends "app_ml/base.html" %}
+
+{% block title %}Dog · Cat · Bird Classifier · ML Animal World{% endblock %}
+
+{% block main %}
+<section class="hero">
+  <div class="hero-title">
+    Who am I? 🐶🐱🕊️
+    <span class="badge">Image classification · Dog vs Cat vs Bird</span>
+  </div>
+  <p class="hero-subtitle">
+    This model is trained <strong>only</strong> to recognize three kinds of animals:
+    <strong>dogs, cats and birds</strong>.
+    Upload an image of one of these and see what the network predicts.
+  </p>
+</section>
+
+<div class="grid page-body">
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Upload your dog, cat or bird</div>
+        <p class="hero-subtitle" style="font-size:0.85rem;">
+          Please use images where a <strong>single</strong> animal is visible (dog, cat or bird),
+          centered and with a simple background for better results.
+        </p>
+      </div>
+      <span class="pill">Step 1 · Input</span>
+    </div>
+
+    {% if error %}
+      <p style="color:#ff6b81;font-size:0.85rem;margin-bottom:10px;">
+        {{ error }}
+      </p>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <label class="field-label">Select an image (dog, cat or bird)</label>
+
+        <div
+          style="
+            border-radius: 16px;
+            border: 1px dashed rgba(255,255,255,0.35);
+            padding: 18px;
+            text-align: center;
+            background: radial-gradient(circle at top,#1e2746 0,#121629 50%);
+            font-size: 0.9rem;
+          "
+        >
+          <p style="margin:0 0 8px;">
+            Drop a file here or click to choose 🐾
+          </p>
+          <!-- name="image" coincide con request.FILES.get("image") -->
+          <input type="file" name="image" accept="image/*" style="margin-top: 8px;" />
+        </div>
+
+        <button type="submit" class="btn">
+          Classify (dog / cat / bird)
+          <span>✨</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="card">
+    <div class="card-header">
+      <div class="card-title">Prediction</div>
+      <span class="pill">Step 2 · Output</span>
+    </div>
+
+    {% if prediction %}
+      <p style="font-size:0.9rem;">
+        The model thinks this image is a:
+      </p>
+
+      <!-- prediction.class y prediction.prob vienen de la vista -->
+      <h2 style="margin:6px 0 2px;font-size:1.6rem;">
+        {{ prediction.class }} 🐾
+      </h2>
+
+      <p style="font-size:0.85rem;color:var(--muted);">
+        Confidence:
+        <strong>{{ prediction.prob|floatformat:2 }}%</strong>
+      </p>
+
+      {% if top3 %}
+        <p style="font-size:0.85rem;margin-top:10px;color:var(--muted);">
+          Top-3 among <strong>dog, cat and bird</strong>:
+        </p>
+        <ul style="font-size:0.8rem;color:var(--muted);margin-top:4px;padding-left:18px;">
+          {% for cls, p in top3 %}
+            <li>{{ cls }} — {{ p|floatformat:2 }}%</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <p style="font-size:0.8rem;margin-top:10px;color:var(--muted);">
+        Note: this classifier is not designed for other animals (horses, rabbits, etc.),
+        so predictions are only meaningful when the image contains a dog, a cat or a bird.
+      </p>
+    {% else %}
+      <p style="font-size:0.9rem;color:var(--muted);">
+        No prediction yet. Upload a photo of a <strong>dog, cat or bird</strong> and check what the model says 🐶🐱🕊️.
+      </p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

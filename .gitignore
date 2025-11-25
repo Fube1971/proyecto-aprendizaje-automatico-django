@@ -1,0 +1,40 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos virtuales
+.venv/
+venv/
+
+# Base de datos local
+db.sqlite3
+
+# Archivos de logs
+*.log
+
+# Django static (colectados)
+staticfiles/
+
+# Archivos de usuario (si tuvieras)
+media/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datasets pesados (ajusta nombres según tu proyecto)
+data/
+dataset/
+datasets/
+animalitos/
+images/
+imgs/
+raw_data/
+
+# Kaggle cache
+.kaggle/
+
+# VSCode / IDE
+.vscode/
+.idea/
