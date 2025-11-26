@@ -60,7 +60,7 @@ proyecto_final_procesamiento/
 ### 3.1. Clonar el repositorio
 
 ```bash
-git clone <URL_DE_TU_REPO>.git
+git clone <https://github.com/Fube1971/proyecto-aprendizaje-automatico-django>.git
 cd proyecto_final_procesamiento
 ```
 
