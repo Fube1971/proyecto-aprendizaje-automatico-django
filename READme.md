@@ -443,20 +443,58 @@ Los templates deben usar `{% url 'app_ml:home' %}`, etc.
 
 ---
 
-## 🌐 8. (Preview) Despliegue en Render.com
+## 🌐 8. Deploy en Render.com
 
-Pasos típicos (no implementados todavía):
+La aplicación está desplegada públicamente en:
 
-* Crear un servicio web en Render apuntando al repo de GitHub.
-* Configurar:
+👉 **Demo online:** https://ml-animal-world.onrender.com  
 
-  * `PYTHON_VERSION`
-  * `DJANGO_SETTINGS_MODULE = config.settings`
-  * `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS`, etc.
-* Comando de build: `pip install -r requirements.txt`
-* Comando de start: `gunicorn config.wsgi:application`
+> Render puede “dormir” el servicio si no tiene tráfico.  
+> La primera carga puede tardar unos segundos mientras despierta.
 
-Esta guía se puede detallar en un documento aparte.
+### 8.1. Cómo volver a desplegar (fork / clon nuevo)
+
+Si alguien quiere desplegar este proyecto en su propia cuenta de Render:
+
+1. Hacer **fork** del repo o clonarlo en su GitHub.
+2. En Render → **New → Web Service** → conectar con su repo.
+
+Configurar:
+
+- **Build Command**
+
+  ```bash
+  pip install -r requirements.txt && cd django_app && python manage.py migrate && python manage.py collectstatic --noinput
+
+
+* **Start Command**
+
+  ```bash
+  cd django_app && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+  ```
+
+### 8.2. Variables de entorno necesarias
+
+En la sección **Environment** del servicio en Render:
+
+* `PYTHON_VERSION` = `3.10.14`
+* `DJANGO_SETTINGS_MODULE` = `config.settings`
+* `SECRET_KEY` = cadena larga y aleatoria (no se sube al repo)
+* `DEBUG` = `False`
+* `WEB_CONCURRENCY` = `1`  ← importante para que solo arranque un worker y no se quede sin memoria.
+
+### 8.3. Notas sobre TensorFlow
+
+Para que el despliegue quepa en el plan gratuito de Render se usa:
+
+```txt
+tensorflow-cpu>=2.10.0,<3.0
+```
+
+en `requirements.txt`, que es la versión solo CPU de TensorFlow (más ligera que la versión con GPU).
+Los modelos (`cnn_animales.h5` y `lstm_steam.h5`) se cargan desde `django_app/modelos/` en el arranque.
+
+
 
 ---
 
