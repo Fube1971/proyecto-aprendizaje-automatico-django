@@ -16,7 +16,7 @@ Incluye además una página de documentación donde se explica **cómo se entren
 
 ## 🚀 1. Requisitos
 
-- **Python** 3.10+ (probado con 3.13 en Windows).
+- **Python** 3.10+ (probado con 3.13 en Windows). POSIBLES ERRORES CON PYTHON 3.14!! Te recomendamos usar python 3.13.5 para este proyecto :)
 - `pip` actualizado.
 - Recomendado: entorno virtual (`venv`).
 
@@ -411,6 +411,13 @@ Comparar:
 ---
 
 ## 🐛 7. Problemas frecuentes
+
+### 🛑 Conflictos de librerías al Migrar (Corrupción de archivos)
+
+Es posible que al intentar realizar la migración en Django te genere conflictos porque puede que algunas librerías resulten corruptas en el camino. Es por ello que recomendamos en esa situación realizar el siguiente comando para **forzar la reinstalación ignorando el caché** (recomendado solo en casos extremos):
+
+```bash
+pip install --upgrade --force-reinstall --no-cache-dir numpy pillow django
 
 ### `NoReverseMatch` con `home`, `predict_image`, etc.
 
