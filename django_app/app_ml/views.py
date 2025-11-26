@@ -35,7 +35,7 @@ def predict_image_view(request: HttpRequest) -> HttpResponse:
                 clase, prob, top3 = predict_animal_image(file_obj)
                 context["prediction"] = {
                     "class": clase,
-                    "prob": prob,
+                    "prob": float(prob),  # prob ya viene en porcentaje (0–100) desde el loader
                 }
                 context["top3"] = top3
             except Exception as e:
@@ -51,24 +51,25 @@ def predict_text_view(request: HttpRequest) -> HttpResponse:
     sentimiento según la LSTM entrenada, junto con la probabilidad.
     """
     context = {
-        "text": "",
+        "original_text": "",
         "prediction": None,
         "error": None,
     }
 
     if request.method == "POST":
         text = request.POST.get("review", "").strip()
-        context["text"] = text
+        context["original_text"] = text
 
         if not text:
             context["error"] = "Por favor, escribe una reseña."
         else:
             try:
+                # predict_review devuelve: label_id (0/1), label_str, prob_percent (0–100)
                 label_id, label_str, prob = predict_review(text)
                 context["prediction"] = {
-                    "label_id": label_id,
+                    "label_id": int(label_id),
                     "label_str": label_str,
-                    "prob": prob,
+                    "prob": float(prob),  # porcentaje 0–100
                 }
             except Exception as e:
                 context["error"] = f"Error al procesar el texto: {e}"

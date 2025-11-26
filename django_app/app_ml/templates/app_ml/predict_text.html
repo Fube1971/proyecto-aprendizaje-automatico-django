@@ -1,10 +1,10 @@
-{% extends "app_ml/base.html" %}
+{% extends "app_ml/base.html" %} 
 
 {% block title %}Steam NLP · ML World{% endblock %}
 
 {% block extra_head %}
 <style>
-  /* 1. ESTILOS GENERALES (Copiados para consistencia) */
+  /* 1. ESTILOS GENERALES */
   .hero-section {
     text-align: center;
     padding: 20px 0 40px 0;
@@ -34,13 +34,11 @@
     line-height: 1.6;
   }
 
-  /* BARRA DECORATIVA */
   .stripe-decoration {
     width: 100%;
     max-width: 700px;
     height: 100px; 
     margin: 40px auto;
-    /* Mismo gradiente para identidad de marca */
     background: linear-gradient(90deg, 
       #fb24d7 0%, #5f46ef 60%, #1e4981 100%
     );
@@ -48,7 +46,6 @@
     mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
   }
 
-  /* 2. TARJETA DE INTERACCIÓN */
   .interaction-card {
     background: #FFFFFF;
     max-width: 600px;
@@ -60,14 +57,13 @@
     text-align: center;
   }
 
-  /* TEXTAREA ESTILIZADO */
   textarea.melo-input {
     width: 100%;
     height: 160px;
     padding: 20px;
     border-radius: 12px;
-    border: 2px solid #e0e0e0; /* Borde suave */
-    font-family: 'Fredoka', sans-serif; /* Misma fuente */
+    border: 2px solid #e0e0e0;
+    font-family: 'Fredoka', sans-serif;
     font-size: 1rem;
     line-height: 1.5;
     background: #fafafa;
@@ -78,7 +74,7 @@
   }
 
   textarea.melo-input:focus {
-    border-color: var(--text-main); /* Se pone oscuro al enfocar */
+    border-color: var(--text-main);
     background: #fff;
     outline: none;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -89,7 +85,6 @@
     font-weight: 300;
   }
 
-  /* BOTONES DE ACCIÓN */
   .action-row {
     display: flex;
     gap: 10px;
@@ -99,14 +94,12 @@
   .btn-random {
     background: #f3f4f6;
     color: var(--text-main);
-    /* Hereda estilos base de .btn pero cambiamos el color */
   }
   .btn-random:hover {
     background: #e5e7eb;
     transform: translateY(-2px);
   }
 
-  /* 3. RESULTADOS */
   .result-box {
     animation: fadeIn 0.6s ease forwards;
     margin-bottom: 30px;
@@ -129,7 +122,6 @@
     margin-bottom: 4px;
   }
 
-  /* CLASES DE SENTIMIENTO (Sin errores en VS Code) */
   .confidence-pill {
     display: inline-block;
     padding: 6px 16px;
@@ -139,11 +131,9 @@
     margin-bottom: 20px;
   }
 
-  .pill-positive { background: #dcfce7; color: #15803d; } /* Verde elegante */
-  .pill-negative { background: #fee2e2; color: #b91c1c; } /* Rojo elegante */
-  .pill-neutral  { background: #f3f4f6; color: #374151; }
+  .pill-positive { background: #dcfce7; color: #15803d; }
+  .pill-negative { background: #fee2e2; color: #b91c1c; }
 
-  /* BARRA DE PROGRESO DE POSITIVIDAD */
   .progress-bg {
     width: 100%;
     height: 8px;
@@ -151,7 +141,7 @@
     border-radius: 4px;
     overflow: hidden;
     margin: 0 auto;
-    max-width: 80%; /* No tan ancha */
+    max-width: 80%;
   }
 
   .progress-fill {
@@ -161,7 +151,6 @@
     transition: width 1s ease;
   }
   
-  /* Gradientes específicos para la barra */
   .fill-positive { background: linear-gradient(90deg, #4ade80, #16a34a); }
   .fill-negative { background: linear-gradient(90deg, #f87171, #dc2626); }
 
@@ -178,7 +167,6 @@
     margin-bottom: 20px;
     font-size: 0.9rem;
   }
-
 </style>
 {% endblock %}
 
@@ -197,31 +185,40 @@
 <section class="interaction-card">
 
   {% if prediction %}
-    <div class="result-box">
-      <div class="result-title">Sentiment Analysis</div>
-      
-      <div class="prediction-big">
-        {% if prediction.label == 'positive' %}
-          Recommended 👍
-        {% else %}
-          Not Recommended 👎
-        {% endif %}
-      </div>
-      
-      <div class="confidence-pill 
-        {% if prediction.label == 'positive' %}pill-positive{% else %}pill-negative{% endif %}">
-        {{ prediction.prob|floatformat:1 }}% Certainty
-      </div>
+  <div class="result-box">
+    <div class="result-title">Sentiment Analysis</div>
 
-      <div style="margin-top:10px;">
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Model Score</p>
-        <div class="progress-bg">
-          <div class="progress-fill {% if prediction.label == 'positive' %}fill-positive{% else %}fill-negative{% endif %}" 
-               data-percent="{{ prediction.prob|stringformat:'f' }}"></div>
-        </div>
+    <div class="prediction-big">
+      {# 1 = recomendado, 0 = no recomendado #}
+      {% if prediction.label_id == 1 or prediction.label_id == '1' %}
+        Recommended 👍
+      {% else %}
+        Not Recommended 👎
+      {% endif %}
+    </div>
+
+    <div class="confidence-pill 
+      {% if prediction.label_id == 1 or prediction.label_id == '1' %}pill-positive{% else %}pill-negative{% endif %}">
+      {{ prediction.prob|floatformat:1 }}% Certainty
+    </div>
+
+    <div style="margin-top:10px;">
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Model Score</p>
+      <div class="progress-bg">
+        <div class="progress-fill 
+             {% if prediction.label_id == 1 or prediction.label_id == '1' %}fill-positive{% else %}fill-negative{% endif %}"
+             data-percent="{{ prediction.prob|stringformat:'f' }}"></div>
       </div>
     </div>
-  {% endif %}
+
+    {# DEBUG: deja esto mientras probamos #}
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;">
+      Debug → id: {{ prediction.label_id }} · raw label: <code>{{ prediction.label_str }}</code> · prob: {{ prediction.prob|floatformat:2 }}%
+    </p>
+  </div>
+{% endif %}
+
+
 
   {% if error %}
     <div class="error-msg">⚠️ {{ error }}</div>
@@ -250,7 +247,6 @@
 </section>
 
 <script>
-  // 1. Animar Barra (si existe)
   document.addEventListener("DOMContentLoaded", function() {
     const bars = document.querySelectorAll('.progress-fill');
     bars.forEach(bar => {
@@ -263,7 +259,6 @@
     });
   });
 
-  // 2. Función para llenar reseña de ejemplo
   function fillSampleReview() {
     const samples = [
       "The game mechanics are solid and the art style is gorgeous. I spent 50 hours and loved every minute.",
@@ -276,7 +271,6 @@
     if (textarea) {
       const randomIndex = Math.floor(Math.random() * samples.length);
       textarea.value = samples[randomIndex];
-      // Pequeño efecto visual para indicar cambio
       textarea.style.backgroundColor = "#fffbeb";
       setTimeout(() => textarea.style.backgroundColor = "#fafafa", 300);
     }
