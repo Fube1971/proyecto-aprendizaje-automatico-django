@@ -1,126 +1,266 @@
 {% extends "app_ml/base.html" %}
 
-{% block title %}Meet the Models · ML Animal World{% endblock %}
+{% block title %}The Brains · ML World{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* 1. HERO & DECORATION (Consistente) */
+  .hero-section {
+    text-align: center;
+    padding: 20px 0 40px 0;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  h1.main-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  h1.main-title em {
+    font-family: serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  p.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* BARRA DECORATIVA */
+  .stripe-decoration {
+    width: 100%;
+    max-width: 700px;
+    height: 100px; 
+    margin: 40px auto;
+    background: linear-gradient(90deg, 
+      #d12518 0%, #501b0b 50%, #000000 100%
+    );
+    -webkit-mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
+    mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
+  }
+
+  /* 2. GRID DE MODELOS */
+  .models-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 30px;
+    margin-bottom: 80px;
+  }
+
+  /* TARJETAS TÉCNICAS */
+  .tech-card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 40px 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tech-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+  }
+
+  /* CABECERA DE LA TARJETA */
+  .card-header-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    display: inline-block;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text-main);
+  }
+
+  .card-intro {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* SECCIONES INTERNAS */
+  .specs-section {
+    margin-top: auto; /* Empuja esto al fondo si hay espacio */
+    background: #fafafa;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+  }
+
+  .section-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* LISTA DE SPECS */
+  .specs-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .spec-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+  }
+
+  .spec-bullet {
+    margin-right: 10px;
+    color: #d1d5db; /* Gris claro */
+  }
+
+  /* TAGS/PILLS TÉCNICOS */
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+
+  /* Colores temáticos para los tags */
+  .tag-vision { background: #fff7ed; color: #ea580c; } /* Naranja */
+  .tag-nlp { background: #eff6ff; color: #2563eb; }    /* Azul */
+  .tag-core { background: #fdf2f8; color: #db2777; }   /* Rosa */
+
+  /* CODIGO ESTILIZADO */
+  code {
+    background: #eee;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85em;
+    color: #444;
+  }
+
+</style>
+{% endblock %}
 
 {% block main %}
-<section class="hero">
-  <div class="hero-title">
-    Meet the Models 🧠
-    <span class="badge">How we trained our ML brains</span>
-  </div>
-  <p class="hero-subtitle">
-    This page explains how the image classifier (dog/cat/bird) and the Steam review sentiment model
-    were trained: datasets, architectures, hyperparameters and why these configurations were chosen.
+
+<section class="hero-section">
+  <h1 class="main-title">
+    Behind the <em>Curtains.</em>
+  </h1>
+  <p class="subtitle">
+    Arquitecturas neuronales, datasets y parámetros de entrenamiento. Así es como funcionan nuestros modelos por dentro.
   </p>
+  <div class="stripe-decoration"></div>
 </section>
 
-<div class="grid page-body">
-  <!-- Card 1: CNN de animales -->
-  <section class="card">
-    <div class="card-header">
-      <div class="card-title">Dog · Cat · Bird CNN 🐶🐱🕊️</div>
-      <span class="pill">01 · Image model</span>
+<div class="models-grid">
+
+  <article class="tech-card">
+    <div>
+      <span class="card-header-icon">👁️</span>
+      <h2 class="card-title">CNN Image Classifier</h2>
+      
+      <div class="tech-tags">
+        <span class="tag tag-vision">Conv2D</span>
+        <span class="tag tag-vision">MaxPooling</span>
+        <span class="tag tag-core">Adam</span>
+        <span class="tag">Accuracy: ~78%</span>
+      </div>
+
+      <p class="card-intro">
+        Modelo de clasificación de imágenes entrenado para distinguir entre tres clases: <strong>Dog, Cat, Bird</strong>. Utiliza capas convolucionales para extraer características visuales (bordes, texturas).
+      </p>
     </div>
 
-    <p class="hero-subtitle" style="font-size:0.9rem;">
-      Convolutional Neural Network trained to classify images into three classes:
-      <strong>dog</strong>, <strong>cat</strong> and <strong>bird</strong>.
-      The training process is documented in the notebook
-      <code>01_cnn_animales_imagenes.ipynb</code>.
-    </p>
+    <div class="specs-section">
+      <span class="section-label">Architecture Specs</span>
+      <ul class="specs-list">
+        <li class="spec-item">
+          <span class="spec-bullet">├─</span>
+          <span><strong>Input:</strong> Imágenes RGB normalizadas (150x150).</span>
+        </li>
+        <li class="spec-item">
+          <span class="spec-bullet">├─</span>
+          <span><strong>Layers:</strong> 3 bloques de Conv2D + MaxPooling para reducción dimensional.</span>
+        </li>
+        <li class="spec-item">
+          <span class="spec-bullet">├─</span>
+          <span><strong>Flatten:</strong> Capa densa de 128 neuronas con activación <code>ReLU</code>.</span>
+        </li>
+        <li class="spec-item">
+          <span class="spec-bullet">└─</span>
+          <span><strong>Output:</strong> Softmax (3 neuronas) para probabilidad multiclase.</span>
+        </li>
+      </ul>
+    </div>
+  </article>
 
-    <h3 style="font-size:1rem;margin-top:12px;">Dataset & preprocessing</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li>Images collected from Kaggle dog/cat and bird datasets and merged into three classes.</li>
-      <li>Balanced dataset per class:
-        about <strong>3507</strong> images per class for train,
-        <strong>751</strong> for validation and <strong>753</strong> for test.</li>
-      <li>Train/Val/Test split ≈ <strong>70% / 15% / 15%</strong>.</li>
-      <li>Images resized to <strong>128×128</strong> pixels and normalized to <code>[0, 1]</code>.</li>
-      <li>Data augmentation in training:
-        small rotations, shifts, zoom and horizontal flips.</li>
-    </ul>
+  <article class="tech-card">
+    <div>
+      <span class="card-header-icon">🧠</span>
+      <h2 class="card-title">LSTM Sentiment Analysis</h2>
+      
+      <div class="tech-tags">
+        <span class="tag tag-nlp">Embedding</span>
+        <span class="tag tag-nlp">LSTM</span>
+        <span class="tag tag-core">Dropout 0.3</span>
+        <span class="tag">Accuracy: ~82%</span>
+      </div>
 
-    <h3 style="font-size:1rem;margin-top:12px;">Architectures compared</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li><strong>Model 1 – Simple CNN</strong>:
-        2 Conv2D+MaxPooling blocks, dense layer with 128 units and dropout 0.5.</li>
-      <li><strong>Model 2 – Deeper CNN</strong>:
-        3 Conv blocks with more filters (32, 64, 128),
-        dense layer with 256 units and dropout 0.5.</li>
-    </ul>
-
-    <h3 style="font-size:1rem;margin-top:12px;">Hyperparameter search</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li>Optimizers tested:
-        <strong>Adam</strong> and <strong>SGD</strong> with different learning rates.</li>
-      <li>Loss functions:
-        <code>CategoricalCrossentropy</code> and the same loss with
-        <strong>label smoothing</strong>.</li>
-      <li>The best configuration was:
-        <strong>Model 2 + Adam (lr = 5e-4) + CategoricalCrossentropy</strong> trained for
-        <strong>15 epochs</strong>.</li>
-    </ul>
-
-    <h3 style="font-size:1rem;margin-top:12px;">Results (test set)</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li>Test accuracy ≈ <strong>0.85</strong> (85%).</li>
-      <li>Very good recall for birds, and balanced performance on dogs and cats.</li>
-      <li>The confusion matrix and classification report show that the deeper CNN
-        generalizes better than the small CNN and than settings with higher learning rates.</li>
-    </ul>
-  </section>
-
-  <!-- Card 2: LSTM de Steam -->
-  <section class="card">
-    <div class="card-header">
-      <div class="card-title">Steam Review LSTM 🎮</div>
-      <span class="pill">02 · Text model</span>
+      <p class="card-intro">
+        Red neuronal recurrente (RNN) tipo LSTM diseñada para procesar secuencias de texto. Analiza reseñas de videojuegos para predecir sentimiento binario (Recomendado/No Recomendado).
+      </p>
     </div>
 
-    <p class="hero-subtitle" style="font-size:0.9rem;">
-      LSTM-based model trained on the Kaggle dataset
-      <strong>Sentiment Analysis for Steam Reviews</strong> to classify reviews as
-      <em>recommended</em> or <em>not recommended</em>.
-      The full experiment is in <code>02_rnn_lstm_steam.ipynb</code>.
-    </p>
+    <div class="specs-section">
+      <span class="section-label">Training Specs</span>
+      <ul class="specs-list">
+        <li class="spec-item">
+          <span class="spec-bullet">├─</span>
+          <span><strong>Embedding:</strong> Vectorización de palabras (Dim 128).</span>
+        </li>
+        <li class="spec-item">
+          <span class="spec-bullet">├─</span>
+          <span><strong>Core:</strong> LSTM Layer (128 units) con <code>recurrent_dropout</code> para evitar overfitting.</span>
+        </li>
+        <li class="spec-item">
+          <span class="spec-bullet">├─</span>
+          <span><strong>Loss:</strong> <code>BinaryCrossentropy</code>.</span>
+        </li>
+        <li class="spec-item">
+          <span class="spec-bullet">└─</span>
+          <span><strong>Output:</strong> Sigmoide (0 a 1) para clasificación binaria.</span>
+        </li>
+      </ul>
+    </div>
+  </article>
 
-    <h3 style="font-size:1rem;margin-top:12px;">Dataset & preprocessing</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li>Source CSV: <code>train.csv</code> with columns <code>user_review</code> and
-        <code>user_suggestion</code>.</li>
-      <li>Labels: <code>1 → positivo (recomendado)</code>, <code>0 → negativo (no recomendado)</code>.</li>
-      <li>Basic cleaning:
-        lowercase, removal of URLs, non-alphabetic characters cleanup and space normalization.</li>
-      <li>Split into Train / Val / Test with proportions ≈ 70% / 15% / 15% (stratified).</li>
-      <li>Tokenizer with vocab size up to <strong>30k tokens</strong>, sequences padded to
-        <strong>200 tokens</strong>.</li>
-    </ul>
-
-    <h3 style="font-size:1rem;margin-top:12px;">Models compared</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li><strong>Simple RNN</strong>: Embedding(128) + SimpleRNN(64) + Dense(1, sigmoide).</li>
-      <li><strong>LSTM 1</strong>: Embedding(64) + LSTM(64) + Dense(1, sigmoide).</li>
-      <li><strong>LSTM 2 (final)</strong>: Embedding(128) + LSTM(128) with dropout=0.3 and
-        recurrent_dropout=0.3 + Dense(1, sigmoide).</li>
-    </ul>
-
-    <h3 style="font-size:1rem;margin-top:12px;">Training setup</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li>Loss: <code>BinaryCrossentropy</code> with slight label smoothing (0.05).</li>
-      <li>Optimizer: <strong>Adam</strong> with different learning rates per configuration.</li>
-      <li>Batch size: <strong>64</strong>.</li>
-      <li>Final best model (LSTM 2): <strong>lr = 1e-4</strong>, <strong>10 epochs</strong>.</li>
-    </ul>
-
-    <h3 style="font-size:1rem;margin-top:12px;">Results & model selection</h3>
-    <ul style="font-size:0.85rem;color:var(--muted);line-height:1.5;">
-      <li>Best validation accuracy:
-        LSTM 2 reached ≈ <strong>0.78</strong>, clearly higher than Simple RNN and LSTM 1.</li>
-      <li>Test accuracy of the chosen model (LSTM 2): ≈ <strong>0.77</strong>.</li>
-      <li>Confusion matrix shows a good balance between positive and negative reviews.</li>
-      <li>For this reason, the web app loads the LSTM 2 checkpoint as the final model.</li>
-    </ul>
-  </section>
 </div>
+
 {% endblock %}

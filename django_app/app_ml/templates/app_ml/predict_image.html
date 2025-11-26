@@ -1,110 +1,302 @@
 {% extends "app_ml/base.html" %}
 
-{% block title %}Dog · Cat · Bird Classifier · ML Animal World{% endblock %}
+{% block title %}Animal Vision · ML World{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* 1. ESTILOS GENERALES */
+  .hero-section {
+    text-align: center;
+    padding: 20px 0 40px 0;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  h1.main-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  h1.main-title em {
+    font-family: serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  p.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* BARRA DECORATIVA */
+  .stripe-decoration {
+    width: 100%;
+    max-width: 700px;
+    height: 100px; 
+    margin: 40px auto;
+    background: linear-gradient(90deg, 
+      #fbbf24 0%,   
+      #f97316 70%,  
+      #b60808 100%  
+    );
+    -webkit-mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
+    mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
+  }
+
+  /* 2. TARJETA */
+  .interaction-card {
+    background: #FFFFFF;
+    max-width: 600px;
+    margin: 0 auto 60px auto;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+    text-align: center;
+  }
+
+  /* INPUT FILE */
+  .file-drop-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 40px 20px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 12px;
+    transition: 0.2s;
+    background: #fafafa;
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+
+  .file-drop-area:hover {
+    border-color: var(--text-main);
+    background: #fff;
+  }
+
+  .fake-btn {
+    background: #eee;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    font-weight: 600;
+  }
+
+  .file-msg {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  input[type=file] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* 3. RESULTADOS */
+  .result-box {
+    animation: fadeIn 0.6s ease forwards;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 30px;
+  }
+
+  .result-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .prediction-big {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  /* CLASES DE PILDORAS (Sin lógica en style) */
+  .confidence-pill {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+
+  .pill-dog { background: #fffbeb; color: #b45309; }
+  .pill-cat { background: #fdf2f8; color: #be185d; }
+  .pill-bird { background: #eff6ff; color: #1d4ed8; }
+  .pill-default { background: #f3f4f6; color: #374151; }
+
+  /* BARRAS DE PROGRESO */
+  .stats-list {
+    list-style: none;
+    text-align: left;
+    margin-top: 20px;
+  }
+
+  .stat-item { margin-bottom: 12px; }
+
+  .stat-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .progress-bg {
+    width: 100%;
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #fbbf24, #f97316); 
+    width: 0%; /* Empieza en 0 y JS lo rellena */
+    transition: width 1s ease; /* Animación suave */
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .error-msg {
+    color: #ef4444;
+    background: #fef2f2;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
 
 {% block main %}
-<section class="hero">
-  <div class="hero-title">
-    Who am I? 🐶🐱🕊️
-    <span class="badge">Image classification · Dog vs Cat vs Bird</span>
-  </div>
-  <p class="hero-subtitle">
-    This model is trained <strong>only</strong> to recognize three kinds of animals:
-    <strong>dogs, cats and birds</strong>.
-    Upload an image of one of these and see what the network predicts.
+
+<section class="hero-section">
+  <h1 class="main-title">
+    Focus. Capture. <em>Identify.</em>
+  </h1>
+  <p class="subtitle">
+    Sube una imagen. Nuestra red neuronal convolucional (CNN) analizará los píxeles para decirte si es un perro, un gato o un ave.
   </p>
+  <div class="stripe-decoration"></div>
 </section>
 
-<div class="grid page-body">
-  <section class="card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">Upload your dog, cat or bird</div>
-        <p class="hero-subtitle" style="font-size:0.85rem;">
-          Please use images where a <strong>single</strong> animal is visible (dog, cat or bird),
-          centered and with a simple background for better results.
-        </p>
+<section class="interaction-card">
+
+  {% if prediction %}
+    <div class="result-box">
+      <div class="result-title">Analysis Result</div>
+      
+      <div class="prediction-big">
+        {{ prediction.class|title }} 
+        {% if prediction.class == 'dog' %}🐶
+        {% elif prediction.class == 'cat' %}🐱
+        {% elif prediction.class == 'bird' %}🕊️
+        {% endif %}
       </div>
-      <span class="pill">Step 1 · Input</span>
-    </div>
-
-    {% if error %}
-      <p style="color:#ff6b81;font-size:0.85rem;margin-bottom:10px;">
-        {{ error }}
-      </p>
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
-        <label class="field-label">Select an image (dog, cat or bird)</label>
-
-        <div
-          style="
-            border-radius: 16px;
-            border: 1px dashed rgba(255,255,255,0.35);
-            padding: 18px;
-            text-align: center;
-            background: radial-gradient(circle at top,#1e2746 0,#121629 50%);
-            font-size: 0.9rem;
-          "
-        >
-          <p style="margin:0 0 8px;">
-            Drop a file here or click to choose 🐾
-          </p>
-          <!-- name="image" coincide con request.FILES.get("image") -->
-          <input type="file" name="image" accept="image/*" style="margin-top: 8px;" />
-        </div>
-
-        <button type="submit" class="btn">
-          Classify (dog / cat / bird)
-          <span>✨</span>
-        </button>
+      
+      <div class="confidence-pill 
+        {% if prediction.class == 'dog' %}pill-dog
+        {% elif prediction.class == 'cat' %}pill-cat
+        {% elif prediction.class == 'bird' %}pill-bird
+        {% else %}pill-default{% endif %}">
+        {{ prediction.prob|floatformat:1 }}% Confidence
       </div>
-    </form>
-  </section>
-
-  <aside class="card">
-    <div class="card-header">
-      <div class="card-title">Prediction</div>
-      <span class="pill">Step 2 · Output</span>
-    </div>
-
-    {% if prediction %}
-      <p style="font-size:0.9rem;">
-        The model thinks this image is a:
-      </p>
-
-      <!-- prediction.class y prediction.prob vienen de la vista -->
-      <h2 style="margin:6px 0 2px;font-size:1.6rem;">
-        {{ prediction.class }} 🐾
-      </h2>
-
-      <p style="font-size:0.85rem;color:var(--muted);">
-        Confidence:
-        <strong>{{ prediction.prob|floatformat:2 }}%</strong>
-      </p>
 
       {% if top3 %}
-        <p style="font-size:0.85rem;margin-top:10px;color:var(--muted);">
-          Top-3 among <strong>dog, cat and bird</strong>:
-        </p>
-        <ul style="font-size:0.8rem;color:var(--muted);margin-top:4px;padding-left:18px;">
-          {% for cls, p in top3 %}
-            <li>{{ cls }} — {{ p|floatformat:2 }}%</li>
-          {% endfor %}
-        </ul>
+      <div class="stats-list">
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">Probabilities breakdown:</p>
+        {% for cls, p in top3 %}
+          <div class="stat-item">
+            <div class="stat-label">
+              <span>{{ cls|title }}</span>
+              <span>{{ p|floatformat:1 }}%</span>
+            </div>
+            <div class="progress-bg">
+              <div class="progress-fill" data-percent="{{ p|stringformat:'f' }}"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
       {% endif %}
+    </div>
 
-      <p style="font-size:0.8rem;margin-top:10px;color:var(--muted);">
-        Note: this classifier is not designed for other animals (horses, rabbits, etc.),
-        so predictions are only meaningful when the image contains a dog, a cat or a bird.
-      </p>
-    {% else %}
-      <p style="font-size:0.9rem;color:var(--muted);">
-        No prediction yet. Upload a photo of a <strong>dog, cat or bird</strong> and check what the model says 🐶🐱🕊️.
-      </p>
-    {% endif %}
-  </aside>
-</div>
+    <p style="font-size:0.9rem; margin-bottom:20px;">Want to try another one?</p>
+  {% endif %}
+
+  {% if error %}
+    <div class="error-msg">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="file-drop-area">
+      <span class="fake-btn">Choose Image</span>
+      <span class="file-msg">or drag and drop here</span>
+      <input type="file" name="image" accept="image/*" required onchange="updateFileName(this)">
+    </div>
+
+    <button type="submit" class="btn" style="width:100%;">
+      {% if prediction %}Analyze New Image{% else %}Analyze Image{% endif %}
+    </button>
+  </form>
+
+</section>
+
+<script>
+  // 1. Script para animar las barras de progreso sin errores en VS Code
+  document.addEventListener("DOMContentLoaded", function() {
+    const bars = document.querySelectorAll('.progress-fill');
+    bars.forEach(bar => {
+      const width = bar.getAttribute('data-percent');
+      if (width) {
+        // Pequeño timeout para que se vea la animación
+        setTimeout(() => {
+          bar.style.width = width + '%';
+        }, 100);
+      }
+    });
+  });
+
+  // 2. Script para el input file
+  function updateFileName(input) {
+    const fileMsg = input.parentElement.querySelector('.file-msg');
+    if (input.files && input.files.length > 0) {
+      fileMsg.textContent = input.files[0].name;
+      fileMsg.style.color = 'var(--text-main)';
+      fileMsg.style.fontWeight = '600';
+    } else {
+      fileMsg.textContent = 'or drag and drop here';
+      fileMsg.style.fontWeight = '400';
+    }
+  }
+</script>
+
 {% endblock %}

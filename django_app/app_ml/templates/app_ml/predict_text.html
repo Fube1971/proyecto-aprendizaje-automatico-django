@@ -1,132 +1,286 @@
 {% extends "app_ml/base.html" %}
 
-{% block title %}Steam Review Quest · ML Animal World{% endblock %}
+{% block title %}Steam NLP · ML World{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* 1. ESTILOS GENERALES (Copiados para consistencia) */
+  .hero-section {
+    text-align: center;
+    padding: 20px 0 40px 0;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  h1.main-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  h1.main-title em {
+    font-family: serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  p.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* BARRA DECORATIVA */
+  .stripe-decoration {
+    width: 100%;
+    max-width: 700px;
+    height: 100px; 
+    margin: 40px auto;
+    /* Mismo gradiente para identidad de marca */
+    background: linear-gradient(90deg, 
+      #fb24d7 0%, #5f46ef 60%, #1e4981 100%
+    );
+    -webkit-mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
+    mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
+  }
+
+  /* 2. TARJETA DE INTERACCIÓN */
+  .interaction-card {
+    background: #FFFFFF;
+    max-width: 600px;
+    margin: 0 auto 60px auto;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+    text-align: center;
+  }
+
+  /* TEXTAREA ESTILIZADO */
+  textarea.melo-input {
+    width: 100%;
+    height: 160px;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #e0e0e0; /* Borde suave */
+    font-family: 'Fredoka', sans-serif; /* Misma fuente */
+    font-size: 1rem;
+    line-height: 1.5;
+    background: #fafafa;
+    resize: vertical;
+    transition: 0.2s ease;
+    margin-bottom: 20px;
+    color: var(--text-main);
+  }
+
+  textarea.melo-input:focus {
+    border-color: var(--text-main); /* Se pone oscuro al enfocar */
+    background: #fff;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  
+  textarea::placeholder {
+    color: #cbd5e1;
+    font-weight: 300;
+  }
+
+  /* BOTONES DE ACCIÓN */
+  .action-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .btn-random {
+    background: #f3f4f6;
+    color: var(--text-main);
+    /* Hereda estilos base de .btn pero cambiamos el color */
+  }
+  .btn-random:hover {
+    background: #e5e7eb;
+    transform: translateY(-2px);
+  }
+
+  /* 3. RESULTADOS */
+  .result-box {
+    animation: fadeIn 0.6s ease forwards;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 30px;
+  }
+
+  .result-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .prediction-big {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  /* CLASES DE SENTIMIENTO (Sin errores en VS Code) */
+  .confidence-pill {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+
+  .pill-positive { background: #dcfce7; color: #15803d; } /* Verde elegante */
+  .pill-negative { background: #fee2e2; color: #b91c1c; } /* Rojo elegante */
+  .pill-neutral  { background: #f3f4f6; color: #374151; }
+
+  /* BARRA DE PROGRESO DE POSITIVIDAD */
+  .progress-bg {
+    width: 100%;
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 80%; /* No tan ancha */
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 1s ease;
+  }
+  
+  /* Gradientes específicos para la barra */
+  .fill-positive { background: linear-gradient(90deg, #4ade80, #16a34a); }
+  .fill-negative { background: linear-gradient(90deg, #f87171, #dc2626); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .error-msg {
+    color: #ef4444;
+    background: #fef2f2;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+
+</style>
+{% endblock %}
 
 {% block main %}
-<section class="hero">
-  <div class="hero-title">
-    Steam Review Quest 🎮
-    <span class="badge">Sentiment analysis · English only</span>
-  </div>
-  <p class="hero-subtitle">
-    Pretend you are a Steam player writing a review for your favorite (or worst) game.
-    Write your review in <strong>English</strong> and the model will guess if you recommend it or not.
+
+<section class="hero-section">
+  <h1 class="main-title">
+    Read. Process. <em>Understand.</em>
+  </h1>
+  <p class="subtitle">
+    Escribe una reseña de videojuego en inglés. Nuestra red neuronal (LSTM) analizará el contexto para detectar si recomiendas el juego o no.
   </p>
+  <div class="stripe-decoration"></div>
 </section>
 
-<div class="grid page-body">
-  <section class="card">
-    <div class="card-header">
-      <div class="card-title">Your mission</div>
-      <span class="pill">Quest · Write a review</span>
-    </div>
+<section class="interaction-card">
 
-    {% if error %}
-      <p style="color:#ff6b81;font-size:0.85rem;margin-bottom:10px;">
-        {{ error }}
-      </p>
-    {% endif %}
+  {% if prediction %}
+    <div class="result-box">
+      <div class="result-title">Sentiment Analysis</div>
+      
+      <div class="prediction-big">
+        {% if prediction.label == 'positive' %}
+          Recommended 👍
+        {% else %}
+          Not Recommended 👎
+        {% endif %}
+      </div>
+      
+      <div class="confidence-pill 
+        {% if prediction.label == 'positive' %}pill-positive{% else %}pill-negative{% endif %}">
+        {{ prediction.prob|floatformat:1 }}% Certainty
+      </div>
 
-    <form method="post">
-      {% csrf_token %}
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
-        <label class="field-label">Write your review (in English)</label>
-
-        <!-- name="review" coincide con request.POST.get("review") -->
-        <textarea
-          name="review"
-          rows="7"
-          style="
-            width:100%;
-            resize:vertical;
-            border-radius:14px;
-            border:1px solid rgba(255,255,255,0.18);
-            background:#080a14;
-            color:var(--text);
-            padding:10px 12px;
-            font-family:inherit;
-            font-size:0.9rem;
-          "
-          placeholder="Example: After 50 hours, this game has amazing combat but the final boss is totally broken..."
-        >{{ text }}</textarea>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button type="submit" class="btn">
-            Analyze my review
-            <span>🧠</span>
-          </button>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            onclick="fillSampleReview();"
-          >
-            Use a random sample review
-          </button>
+      <div style="margin-top:10px;">
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Model Score</p>
+        <div class="progress-bg">
+          <div class="progress-fill {% if prediction.label == 'positive' %}fill-positive{% else %}fill-negative{% endif %}" 
+               data-percent="{{ prediction.prob|stringformat:'f' }}"></div>
         </div>
       </div>
-    </form>
-  </section>
-
-  <aside class="card">
-    <div class="card-header">
-      <div class="card-title">Model decision</div>
-      <span class="pill">Step 2 · Prediction</span>
     </div>
+  {% endif %}
 
-    {% if prediction %}
-      <p style="font-size:0.9rem;margin-bottom:8px;">
-        The model thinks this review is:
-      </p>
+  {% if error %}
+    <div class="error-msg">⚠️ {{ error }}</div>
+  {% endif %}
 
-      {# Consideramos recomendado si la etiqueta de texto contiene "positivo" #}
-      {% if "positivo" in prediction.label_str|lower %}
-        <div style="font-size:1.4rem;margin-bottom:4px;">
-          👍 Recommended
-        </div>
-        <p style="font-size:0.85rem;color:var(--ok);">
-          Confidence: <strong>{{ prediction.prob|floatformat:2 }}%</strong>
-        </p>
-      {% else %}
-        <div style="font-size:1.4rem;margin-bottom:4px;">
-          👎 Not recommended
-        </div>
-        <p style="font-size:0.85rem;color:var(--danger);">
-          Confidence: <strong>{{ prediction.prob|floatformat:2 }}%</strong>
-        </p>
-      {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    
+    <textarea 
+      name="review" 
+      class="melo-input" 
+      placeholder="E.g., The graphics are amazing but the story is too short..."
+      required
+    >{% if original_text %}{{ original_text }}{% endif %}</textarea>
 
-      <p style="font-size:0.85rem;margin-top:10px;color:var(--muted);">
-        Raw label: <code>{{ prediction.label_str }}</code>
-        (id: {{ prediction.label_id }})
-      </p>
-    {% else %}
-      <p style="font-size:0.9rem;color:var(--muted);">
-        The model is waiting for your story. Write a review and discover if the AI would buy that game
-        or ask for a refund 💸.
-      </p>
-    {% endif %}
-  </aside>
-</div>
+    <div class="action-row">
+      <button type="button" class="btn btn-random" onclick="fillSampleReview()">
+        🎲 Random
+      </button>
+      <button type="submit" class="btn">
+        Analyze Text
+      </button>
+    </div>
+  </form>
+
+</section>
 
 <script>
+  // 1. Animar Barra (si existe)
+  document.addEventListener("DOMContentLoaded", function() {
+    const bars = document.querySelectorAll('.progress-fill');
+    bars.forEach(bar => {
+      const width = bar.getAttribute('data-percent');
+      if (width) {
+        setTimeout(() => {
+          bar.style.width = width + '%';
+        }, 100);
+      }
+    });
+  });
+
+  // 2. Función para llenar reseña de ejemplo
   function fillSampleReview() {
     const samples = [
-      // Very positive
-      "After 80 hours, this game became one of my favorites. The combat is super fun, the characters are lovable and the soundtrack is beautiful. Totally recommended.",
-      // Positive
-      "I really enjoyed this game. The story is short but emotional and the art style is gorgeous. I would recommend it on sale.",
-      // Very negative
-      "After a few hours I was completely disappointed. The game is full of bugs, the controls feel terrible and the story makes no sense. I do not recommend it at all.",
-      // Negative
-      "The idea is interesting but the execution is very poor. Repetitive missions, annoying enemies and constant crashes. Not worth the price.",
-      // Mixed
-      "The gameplay is fun and the art is nice, but the game is extremely grindy and the ending is unsatisfying. I only recommend it for hardcore fans of the genre."
+      "The game mechanics are solid and the art style is gorgeous. I spent 50 hours and loved every minute.",
+      "Terrible optimization. It crashes every 10 minutes and the bugs make it unplayable. Refunded.",
+      "An absolute masterpiece. The soundtrack alone is worth the price.",
+      "Boring and repetitive gameplay. The story makes no sense.",
+      "It's okay for the price, but don't expect a triple-A experience. Good for casual play."
     ];
-
     const textarea = document.querySelector('textarea[name=review]');
-    if (!textarea) return;
-    const randomIndex = Math.floor(Math.random() * samples.length);
-    textarea.value = samples[randomIndex];
+    if (textarea) {
+      const randomIndex = Math.floor(Math.random() * samples.length);
+      textarea.value = samples[randomIndex];
+      // Pequeño efecto visual para indicar cambio
+      textarea.style.backgroundColor = "#fffbeb";
+      setTimeout(() => textarea.style.backgroundColor = "#fafafa", 300);
+    }
   }
 </script>
+
 {% endblock %}

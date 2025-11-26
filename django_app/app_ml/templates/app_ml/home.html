@@ -2,57 +2,227 @@
 
 {% block title %}Home · ML Animal World{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* 1. HERO SECTION */
+  .hero-section {
+    text-align: center;
+    padding: 20px 0 60px 0;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Para centrar todo verticalmente */
+  }
+
+  h1.main-title {
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    color: var(--text-main);
+    letter-spacing: -1px;
+  }
+  
+  h1.main-title em {
+    font-family: serif; 
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  p.subtitle {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 650px;
+    margin: 0 auto 0 auto; /* Quitamos margen inferior porque ahora viene la barra */
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+.stripe-decoration {
+    width: 100%;
+    max-width: 1000px; /* Un poco más ancha también para compensar la altura */
+    height: 100px;    /* <--- AQUÍ EL CAMBIO (Antes 40px) */
+    margin: 50px auto; /* Un poco más de aire arriba y abajo */
+    
+    /* GRADIENTE EQUILIBRADO (1/3 CADA ZONA) */
+    background: linear-gradient(90deg, 
+      #fbbf24 0%,   /* Amarillo */
+      #f97316 25%,  /* Naranja */
+      #d946ef 35%,  /* Rosa */
+      #4f46e5 70%,  /* Morado */
+      #1a1a1a 80%,  /* Gris Oscuro */
+      #000000 100%  /* Negro */
+    );
+
+    /* Máscara de barras verticales */
+    -webkit-mask-image: repeating-linear-gradient(
+      90deg,
+      black 0px,
+      black 10px,      /* Barras un pelín más gruesas (10px) */
+      transparent 10px, 
+      transparent 20px /* Espacio de 10px */
+    );
+    mask-image: repeating-linear-gradient(
+      90deg,
+      black 0px,
+      black 10px,
+      transparent 10px,
+      transparent 20px
+    );
+  }
+  /* 3. GRID DE TARJETAS */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-bottom: 80px;
+  }
+
+  .feature-card {
+    position: relative; 
+    background: #FFFFFF;
+    padding: 40px 30px;
+    border-radius: 20px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-main);
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .feature-card::before {
+    content: "";
+    position: absolute;
+    inset: 0; 
+    opacity: 0; 
+    transition: opacity 0.4s ease;
+    z-index: 0; 
+  }
+
+  /* Gradientes de las tarjetas */
+  .card-vision::before { background: linear-gradient(135deg, #fcd34d 0%, #fb923c 100%); }
+  .card-nlp::before { background: linear-gradient(135deg, #e879f9 0%, #6366f1 100%); }
+  .card-models::before { background: linear-gradient(135deg, #4b5563 0%, #111827 100%); }
+
+  .feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  }
+  
+  .feature-card:hover::before { opacity: 0.5; }
+
+  .card-content { position: relative; z-index: 1; }
+
+  .card-icon {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  
+  .feature-card:hover .card-icon { transform: scale(1.1); }
+
+  .card-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .card-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+  
+  .feature-card:hover .card-desc { color: rgba(0,0,0,0.7); }
+  
+  /* Texto blanco para la tarjeta oscura */
+  .card-models:hover .card-title, 
+  .card-models:hover .card-desc,
+  .card-models:hover .card-link-text {
+    color: #fff !important;
+  }
+
+  .card-link-text {
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-main);
+    display: inline-block;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+    padding-bottom: 4px;
+  }
+
+</style>
+{% endblock %}
+
 {% block main %}
-<section class="hero">
-  <div class="hero-title">
-    Welcome to ML Animal World 🐾
-    <span class="badge">Final project · Machine Learning</span>
-  </div>
-  <p class="hero-subtitle">
-    This web app lets you play with two machine learning models:
-    one that classifies animal images and another that analyzes
-    Steam-style game reviews in English.
+
+<section class="hero-section">
+  
+  <h1 class="main-title">
+    AI is <em>meaningful</em> when you <br>
+    can naturally interact with it.
+  </h1>
+  <p class="subtitle">
+    Descubre cómo las redes neuronales perciben el mundo. Clasifica animales o analiza la intención detrás de las palabras en Steam.
   </p>
+  
+  <div class="stripe-decoration"></div>
+
+  <a href="#explore" class="btn">Explorar Modelos</a>
+
 </section>
 
-<div class="page-body">
-  <section class="card">
-    <div class="card-header">
-      <div class="card-title">What can you do here?</div>
-      <span class="pill">Overview</span>
-    </div>
-    <div style="display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-      <div class="card" style="background:rgba(0,0,0,0.25);box-shadow:none;">
-        <div class="card-title">🐶 Animal Classifier</div>
-        <p style="font-size:0.85rem;color:var(--muted);">
-          Upload an animal image and the model will try to guess which animal it is.
-        </p>
-        <a href="{% url 'app_ml:predict_image' %}" class="btn" style="text-decoration:none;margin-top:4px;">
-          Try animal prediction
-        </a>
-      </div>
+<section id="explore" class="features-grid">
 
-      <div class="card" style="background:rgba(0,0,0,0.25);box-shadow:none;">
-        <div class="card-title">🎮 Steam Review Sentiment</div>
-        <p style="font-size:0.85rem;color:var(--muted);">
-          Roleplay as a Steam player and write a review in English.
-          The model predicts if you recommend the game or not.
-        </p>
-        <a href="{% url 'app_ml:predict_text' %}" class="btn" style="text-decoration:none;margin-top:4px;">
-          Write a review
-        </a>
-      </div>
-
-      <div class="card" style="background:rgba(0,0,0,0.25);box-shadow:none;">
-        <div class="card-title">🧠 Get to know the models</div>
-        <p style="font-size:0.85rem;color:var(--muted);">
-          Learn how the models were trained: datasets, preprocessing, architectures and why each choice was made.
-        </p>
-        <a href="{% url 'app_ml:about_models' %}" class="btn btn-secondary" style="text-decoration:none;margin-top:4px;">
-          Read the model story
-        </a>
-      </div>
+  <a href="{% url 'app_ml:predict_image' %}" class="feature-card card-vision">
+    <div class="card-content">
+      <span class="card-icon">🦊</span>
+      <div class="card-title">Animal Vision</div>
+      <p class="card-desc">
+        Sube una imagen. La CNN identificará patrones visuales para distinguir entre perro, gato o ave.
+      </p>
     </div>
-  </section>
-</div>
+    <div class="card-content">
+      <span class="card-link-text">Try Vision &rarr;</span>
+    </div>
+  </a>
+
+  <a href="{% url 'app_ml:predict_text' %}" class="feature-card card-nlp">
+    <div class="card-content">
+      <span class="card-icon">👾</span>
+      <div class="card-title">Steam Sentiment</div>
+      <p class="card-desc">
+        Procesamiento de lenguaje natural (LSTM) para detectar si una reseña recomienda o no un juego.
+      </p>
+    </div>
+    <div class="card-content">
+      <span class="card-link-text">Try NLP &rarr;</span>
+    </div>
+  </a>
+
+  <a href="{% url 'app_ml:about_models' %}" class="feature-card card-models">
+    <div class="card-content">
+      <span class="card-icon">🧠</span>
+      <div class="card-title">The Brains</div>
+      <p class="card-desc">
+        Documentación técnica. Arquitecturas, hiperparámetros y datasets utilizados en el entrenamiento.
+      </p>
+    </div>
+    <div class="card-content">
+      <span class="card-link-text">View Specs &rarr;</span>
+    </div>
+  </a>
+
+</section>
+
 {% endblock %}
