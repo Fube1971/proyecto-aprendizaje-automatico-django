@@ -41,9 +41,13 @@
     height: 100px; 
     margin: 40px auto;
     background: linear-gradient(90deg, 
+
       #fbbf24 0%,   
+
       #f97316 70%,  
+
       #b60808 100%  
+
     );
     -webkit-mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
     mask-image: repeating-linear-gradient(90deg, black 0px, black 10px, transparent 10px, transparent 20px);
@@ -131,7 +135,7 @@
     margin-bottom: 4px;
   }
 
-  /* CLASES DE PILDORAS (Sin lógica en style) */
+  /* CLASES DE PILDORAS */
   .confidence-pill {
     display: inline-block;
     padding: 6px 16px;
@@ -175,8 +179,8 @@
     height: 100%;
     border-radius: 4px;
     background: linear-gradient(90deg, #fbbf24, #f97316); 
-    width: 0%; /* Empieza en 0 y JS lo rellena */
-    transition: width 1s ease; /* Animación suave */
+    width: 0%; 
+    transition: width 1s ease;
   }
 
   @keyframes fadeIn {
@@ -226,7 +230,7 @@
         {% elif prediction.class == 'cat' %}pill-cat
         {% elif prediction.class == 'bird' %}pill-bird
         {% else %}pill-default{% endif %}">
-        {{ prediction.prob|floatformat:1 }}% Confidence
+        {% widthratio prediction.prob 1 100 %}% Confidence
       </div>
 
       {% if top3 %}
@@ -236,10 +240,10 @@
           <div class="stat-item">
             <div class="stat-label">
               <span>{{ cls|title }}</span>
-              <span>{{ p|floatformat:1 }}%</span>
+              <span>{% widthratio p 1 100 %}%</span>
             </div>
             <div class="progress-bg">
-              <div class="progress-fill" data-percent="{{ p|stringformat:'f' }}"></div>
+              <div class="progress-fill" data-percent="{% widthratio p 1 100 %}"></div>
             </div>
           </div>
         {% endfor %}
@@ -271,13 +275,12 @@
 </section>
 
 <script>
-  // 1. Script para animar las barras de progreso sin errores en VS Code
+  // 1. Script para animar las barras
   document.addEventListener("DOMContentLoaded", function() {
     const bars = document.querySelectorAll('.progress-fill');
     bars.forEach(bar => {
       const width = bar.getAttribute('data-percent');
       if (width) {
-        // Pequeño timeout para que se vea la animación
         setTimeout(() => {
           bar.style.width = width + '%';
         }, 100);
