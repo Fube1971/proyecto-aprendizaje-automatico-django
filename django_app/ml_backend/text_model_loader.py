@@ -1,74 +1,43 @@
 from pathlib import Path
 import json
-import re
 import pickle
 from typing import Tuple
 
 import numpy as np
-from django.conf import settings
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
+# BASE_DIR = raíz de django_app
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODELOS_DIR = BASE_DIR / "modelos"
 
-# Longitud máxima usada en el notebook de texto.
-# Se debe colocar el mismo valor que se usó allí (por ejemplo 200).
+MODEL_PATH = MODELOS_DIR / "lstm_steam.h5"
+TOKENIZER_PATH = MODELOS_DIR / "tokenizer_steam.pkl"
+LABEL_MAP_PATH = MODELOS_DIR / "label_map_steam.json"
+
+# --- Carga en memoria una sola vez --- #
+text_model = load_model(MODEL_PATH)
+
+with open(TOKENIZER_PATH, "rb") as f:
+    tokenizer = pickle.load(f)
+
+with open(LABEL_MAP_PATH, "r", encoding="utf-8") as f:
+    label_map = json.load(f)
+
+# Debe coincidir con el notebook
 MAX_SEQUENCE_LENGTH = 200
 
-MODELS_DIR = Path(settings.BASE_DIR).parent / "modelos"
 
-_TEXT_MODEL = None
-_TOKENIZER = None
-_LABEL_MAP = None
-
-
-def clean_text(text: str) -> str:
+def predict_review(text: str) -> Tuple[int, str, float]:
     """
-    Aplica una limpieza básica de texto similar a la usada en el notebook:
-    - Conversión a minúsculas,
-    - Eliminación de caracteres no alfanuméricos básicos,
-    - Colapso de espacios.
+    Recibe un texto en inglés y devuelve:
+    - label_id: 0 (no recomendado) o 1 (recomendado)
+    - label_str: descripción en español según label_map
+    - prob_percent: probabilidad (0–100) de que sea RECOMENDADO
     """
-    text = text.lower()
-    text = re.sub(r"[^a-z0-9\s]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
 
-
-def load_text_assets():
-    """
-    Carga perezosamente el modelo LSTM, el tokenizer y el mapa de etiquetas.
-    """
-    global _TEXT_MODEL, _TOKENIZER, _LABEL_MAP
-
-    if _TEXT_MODEL is None:
-        model_path = MODELS_DIR / "lstm_steam.h5"
-        tokenizer_path = MODELS_DIR / "tokenizer_steam.pkl"
-        label_map_path = MODELS_DIR / "label_map_steam.json"
-
-        _TEXT_MODEL = load_model(model_path)
-
-        with open(tokenizer_path, "rb") as f:
-            _TOKENIZER = pickle.load(f)
-
-        with open(label_map_path, "r", encoding="utf-8") as f:
-            _LABEL_MAP = json.load(f)
-
-    return _TEXT_MODEL, _TOKENIZER, _LABEL_MAP
-
-
-def predict_review(text: str) -> Tuple[str, str, float]:
-    """
-    Realiza una predicción de sentimiento sobre una reseña de juego.
-
-    Retorna:
-        - id de etiqueta ("0" o "1"),
-        - descripción de la etiqueta según el label_map,
-        - probabilidad estimada de ser 'positivo' (etiqueta 1).
-    """
-    model, tokenizer, label_map = load_text_assets()
-
-    clean = clean_text(text)
-    seq = tokenizer.texts_to_sequences([clean])
+    # 1) Texto -> secuencia
+    seq = tokenizer.texts_to_sequences([text])
     pad = pad_sequences(
         seq,
         maxlen=MAX_SEQUENCE_LENGTH,
@@ -76,8 +45,16 @@ def predict_review(text: str) -> Tuple[str, str, float]:
         truncating="post",
     )
 
-    prob = float(model.predict(pad)[0][0])
-    label_id = "1" if prob >= 0.5 else "0"
-    label_str = label_map.get(label_id, "desconocido")
+    # 2) Modelo -> prob (sigmoide, 0–1)
+    prob = float(text_model.predict(pad)[0][0])
 
-    return label_id, label_str, prob
+    # 3) Umbral EXACTAMENTE como en el notebook
+    label_id = 1 if prob >= 0.5 else 0
+
+    # 4) Traducimos a string usando el mismo label_map del notebook
+    label_str = label_map.get(str(label_id), "desconocido")
+
+    # 5) Convertimos a porcentaje para la UI
+    prob_percent = prob * 100.0
+
+    return label_id, label_str, prob_percent
