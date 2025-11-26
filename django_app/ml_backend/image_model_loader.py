@@ -5,10 +5,7 @@ from typing import Tuple, List
 import numpy as np
 from PIL import Image
 from django.conf import settings
-
-# ⚠️ IMPORTANTE:
-# NO importamos TensorFlow aquí, porque Render explota la RAM.
-# Lo importamos dentro de la función cuando realmente lo necesitemos.
+import tensorflow.lite as tflite  # ✔ TFLite correcto
 
 # Tamaño de imagen usado en el entrenamiento
 IMG_SIZE = 128
@@ -16,39 +13,42 @@ IMG_SIZE = 128
 # Carpeta donde están tus modelos
 MODELS_DIR = Path(settings.BASE_DIR).parent / "modelos"
 
-# Variables globales de carga diferida
-_CNN_MODEL = None
+# Variables globales (lazy loading)
+_INTERPRETER = None
+_INPUT_DETAILS = None
+_OUTPUT_DETAILS = None
 _CLASS_NAMES: List[str] = []
 
 
-def load_image_assets():
+def load_tflite_assets():
     """
-    Carga perezosamente el modelo y los nombres de clase.
-    Render no puede cargar TensorFlow al iniciar, por eso la carga se hace aquí,
-    y únicamente la primera vez.
+    Carga perezosamente el modelo TFLite y los nombres de clase.
+    Ahora Render NO se rompe porque no usa TensorFlow pesado.
     """
-    global _CNN_MODEL, _CLASS_NAMES
+    global _INTERPRETER, _INPUT_DETAILS, _OUTPUT_DETAILS, _CLASS_NAMES
 
-    if _CNN_MODEL is None:
-        model_path = MODELS_DIR / "cnn_animales.h5"
+    if _INTERPRETER is None:
+        model_path = MODELS_DIR / "cnn_animales.tflite"
         class_names_path = MODELS_DIR / "class_names_animales.json"
 
-        # ⚠️ IMPORTAR TENSORFLOW AQUÍ (lazy import)
-        from tensorflow.keras.models import load_model
+        # ✔ Cargar modelo TFLite (MUY liviano)
+        interpreter = tflite.Interpreter(model_path=str(model_path))
+        interpreter.allocate_tensors()
 
-        # Cargar modelo
-        _CNN_MODEL = load_model(model_path)
+        _INTERPRETER = interpreter
+        _INPUT_DETAILS = interpreter.get_input_details()
+        _OUTPUT_DETAILS = interpreter.get_output_details()
 
         # Cargar nombres de clases
         with open(class_names_path, "r", encoding="utf-8") as f:
             _CLASS_NAMES = json.load(f)
 
-    return _CNN_MODEL, _CLASS_NAMES
+    return _INTERPRETER, _INPUT_DETAILS, _OUTPUT_DETAILS, _CLASS_NAMES
 
 
 def preprocess_image(file_obj) -> np.ndarray:
     """
-    Preprocesa la imagen igual que en el entrenamiento:
+    Preprocesamiento de imagen:
     RGB, resize, normalización y batch dimension.
     """
     img = Image.open(file_obj).convert("RGB")
@@ -60,14 +60,17 @@ def preprocess_image(file_obj) -> np.ndarray:
 
 def predict_animal_image(file_obj) -> Tuple[str, float, List[Tuple[str, float]]]:
     """
-    Realiza una predicción y devuelve:
-        top1_class, top1_prob, top3
+    Realiza predicción usando el modelo TFLite.
     """
-    model, class_names = load_image_assets()
-    x = preprocess_image(file_obj)
+    interpreter, input_details, output_details, class_names = load_tflite_assets()
+    img_array = preprocess_image(file_obj)
 
-    # Predicción
-    probs = model.predict(x)[0]  # vector de probabilidades
+    # ✔ Enviar al modelo TFLite
+    interpreter.set_tensor(input_details[0]['index'], img_array)
+    interpreter.invoke()
+
+    # ✔ Obtener predicción
+    probs = interpreter.get_tensor(output_details[0]['index'])[0]
     probs = probs.astype(float)
 
     # Top 1
